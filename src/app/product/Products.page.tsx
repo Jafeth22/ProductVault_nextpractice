@@ -4,6 +4,7 @@ import { Box, Button, Flex, Image, Text } from "@chakra-ui/react";
 import Products from "@services/products.service";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 type Product = {
   id: number | string;
@@ -16,7 +17,7 @@ const ProductsPage = () => {
   const [areProductsVisible, setAreProductsVisible] = useState(false);
 
   const {
-    data: products = [],// the data returned from the query, [] as default value
+    data: products = [], // the data returned from the query, [] as default value
     refetch, // function to manually trigger the query
     isFetching, // boolean indicating if the query is currently fetching data
     error, // any error that occurred during the query
@@ -114,8 +115,9 @@ const ProductsPage = () => {
                   bottom={0}
                   colorPalette="grey"
                   _hover={{ colorPalette: "yellow" }}
+                  asChild
                 >
-                  View details
+                  <Link href={`/product/${product.id}`}>View details</Link>
                 </Button>
               </Box>
             </Flex>
