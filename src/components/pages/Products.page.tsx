@@ -1,22 +1,38 @@
 "use client";
 
-import { Box, Button, Flex, HStack, Image, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Image, Text } from "@chakra-ui/react";
 import Products from "@services/products.service";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+type Product = {
+  id: number | string;
+  title: string;
+  thumbnail: string;
+  [key: string]: unknown;
+};
 
 const ProductsPage = () => {
-  const [products, setProducts] = useState([]);
   const [areProductsVisible, setAreProductsVisible] = useState(false);
 
-  const getProducts = async () => {
-    const newProducts = await Products().getProducts();
-    console.log(["New Products", newProducts]);
-    setProducts(newProducts);
+  const {
+    data: products = [],// the data returned from the query, [] as default value
+    refetch, // function to manually trigger the query
+    isFetching, // boolean indicating if the query is currently fetching data
+    error, // any error that occurred during the query
+  } = useQuery<Product[]>({
+    queryKey: ["products"], // key for catching and identifying the query
+    queryFn: Products().getProducts, // fn that returns the data
+    enabled: false, // disable automatic fetching on mount
+    staleTime: 1000 * 60 * 5, // 5 minutes, data is considered fresh for this duration
+  });
+
+  const loadProducts = async () => {
+    await refetch();
     setAreProductsVisible(true);
   };
 
   const clearListProducts = () => {
-    setProducts([]);
     setAreProductsVisible(false);
   };
 
@@ -34,15 +50,33 @@ const ProductsPage = () => {
         Products page
         <Button
           ml={4}
-          onClick={areProductsVisible ? clearListProducts : getProducts}
-          colorPalette={areProductsVisible ? "red" : "blue"}
-          _hover={{ colorPalette: areProductsVisible ? "red" : "blue" }}
+          onClick={areProductsVisible ? clearListProducts : loadProducts}
+          colorPalette={
+            areProductsVisible ? "red" : isFetching ? "green" : "blue"
+          }
+          _hover={{
+            colorPalette: areProductsVisible
+              ? "red"
+              : isFetching
+                ? "green"
+                : "blue",
+          }}
         >
-          {areProductsVisible ? "Clear List" : "Get Products"}
+          {areProductsVisible
+            ? "Clear List"
+            : isFetching
+              ? "Loading..."
+              : "Get Products"}
         </Button>
       </Flex>
 
-      {products && (
+      {error && (
+        <Text color="red.500">
+          Error loading products: {(error as Error).message}
+        </Text>
+      )}
+
+      {areProductsVisible && (
         <Flex
           w="100%"
           alignItems="center"
@@ -50,7 +84,7 @@ const ProductsPage = () => {
           flexWrap="wrap"
           gap={3}
         >
-          {products?.map((product: any) => (
+          {products.map((product) => (
             <Flex
               key={product.id}
               direction="column"
