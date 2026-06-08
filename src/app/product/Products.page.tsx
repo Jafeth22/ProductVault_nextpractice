@@ -1,41 +1,32 @@
 "use client";
+import { useState } from "react";
+// import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Box, Button, Flex, Image, Text } from "@chakra-ui/react";
-import Products from "@services/products.service";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 
-type Product = {
-  id: number | string;
-  title: string;
-  thumbnail: string;
-  [key: string]: unknown;
-};
+import Products from "@services/products.service";
 
 const ProductsPage = () => {
-  const [areProductsVisible, setAreProductsVisible] = useState(false);
+  const router = useRouter();
+  const [loadingId, setLoadingId] = useState<number | null>(null);
 
   const {
-    data: products = [], // the data returned from the query, [] as default value
-    refetch, // function to manually trigger the query
-    isFetching, // boolean indicating if the query is currently fetching data
+    data: products, // the data returned from the query, it is remaining data to products and initializing [] as default value
+    isSuccess, // boolean indicating if the query was successful
+    isLoading, // boolean indicating if the query is currently loading
     error, // any error that occurred during the query
-  } = useQuery<Product[]>({
+  } = useQuery({
     queryKey: ["products"], // key for catching and identifying the query
     queryFn: Products().getProducts, // fn that returns the data
-    enabled: false, // disable automatic fetching on mount
     staleTime: 1000 * 60 * 5, // 5 minutes, data is considered fresh for this duration
   });
 
-  const loadProducts = async () => {
-    await refetch();
-    setAreProductsVisible(true);
-  };
-
-  const clearListProducts = () => {
-    setAreProductsVisible(false);
-  };
+  const handleProductClick = (productId: number) => {
+    setLoadingId(productId);
+    router.push(`/product/${productId}`);
+  }
 
   return (
     <Flex
@@ -48,28 +39,10 @@ const ProductsPage = () => {
       my={4}
     >
       <Flex w="100%" alignItems="center" justifyContent="center">
-        Products page
-        <Button
-          ml={4}
-          onClick={areProductsVisible ? clearListProducts : loadProducts}
-          colorPalette={
-            areProductsVisible ? "red" : isFetching ? "green" : "blue"
-          }
-          _hover={{
-            colorPalette: areProductsVisible
-              ? "red"
-              : isFetching
-                ? "green"
-                : "blue",
-          }}
-        >
-          {areProductsVisible
-            ? "Clear List"
-            : isFetching
-              ? "Loading..."
-              : "Get Products"}
-        </Button>
+        Products List
       </Flex>
+
+      {isLoading && <Text>Loading products...</Text>}
 
       {error && (
         <Text color="red.500">
@@ -77,7 +50,7 @@ const ProductsPage = () => {
         </Text>
       )}
 
-      {areProductsVisible && (
+      {isSuccess && (
         <Flex
           w="100%"
           alignItems="center"
@@ -112,12 +85,13 @@ const ProductsPage = () => {
                   h="30px"
                   w="100%"
                   mt={2}
-                  bottom={0}
                   colorPalette="grey"
                   _hover={{ colorPalette: "yellow" }}
-                  asChild
+                  loading={loadingId === product.id}
+                  disabled={loadingId !== null}
+                  onClick={() => handleProductClick(product.id)}
                 >
-                  <Link href={`/product/${product.id}`}>View details</Link>
+                  View details
                 </Button>
               </Box>
             </Flex>
