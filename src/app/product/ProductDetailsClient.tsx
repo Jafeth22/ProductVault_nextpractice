@@ -1,5 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 import {
   Box,
@@ -13,12 +14,13 @@ import {
   Tag,
   Text,
 } from "@chakra-ui/react";
-import Link from "next/link";
 
-import Products from "@services/products.service";
-import { HiStar } from "react-icons/hi";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { CgUnavailable } from "react-icons/cg";
+
+import Products from "@services/products.service";
+import RatingStars from "@components/custom/RatingStars.comp";
+import { HiStar } from "react-icons/hi";
 
 interface Props {
   id: string;
@@ -46,17 +48,6 @@ export default function ProductDetailsClient({ id }: Props) {
     }).format(date);
   };
 
-  const fillStars = (rating: number) =>
-    Array.from({ length: 5 }, (_, i) => (
-      <Icon
-        key={i}
-        color={i < Math.floor(rating) ? "yellow.600" : "gray"}
-        size="xs"
-      >
-        <HiStar />
-      </Icon>
-    ));
-
   return (
     <Box m={4}>
       <Button asChild>
@@ -67,9 +58,8 @@ export default function ProductDetailsClient({ id }: Props) {
           src={product.images[0]}
           alt={product.title}
           w="60%"
-          //   maxW="570px"
           maxH="600px"
-          objectFit="cover"
+          objectFit="contain"
         />
         <Box w="35%">
           <HStack alignItems="center">
@@ -89,12 +79,9 @@ export default function ProductDetailsClient({ id }: Props) {
             {product.title}
           </Heading>
 
-          <HStack alignItems="center" gap={2} mt={1}>
-            <Box>{fillStars(product.rating)}</Box>
-            <Text fontSize="sm" fontWeight="bold">
-              {product.rating}
-            </Text>
-            <Separator orientation="vertical" size="lg" height="1" />
+          <HStack alignItems="baseline" gap={2} mt={1}>
+            {RatingStars(product.rating)}
+            <Separator orientation="vertical" size="lg" height="2" />
             <Text fontSize="sm" color="gray.500">
               {product.reviews.length} Reviews
             </Text>
@@ -164,14 +151,14 @@ export default function ProductDetailsClient({ id }: Props) {
           <HStack wrap="wrap" gap={2} mt={4}>
             {product.tags.map((tag: any) => (
               <Tag.Root key={tag} colorPalette="cyan">
-                <Tag.Label>{tag}</Tag.Label>
+                <Tag.Label>{tag.toUpperCase()}</Tag.Label>
               </Tag.Root>
             ))}
           </HStack>
 
           <Separator my={4} />
         </Box>
-        
+
         {product.reviews.length > 0 && (
           <Box w="100%" mx={6}>
             <Text fontSize="xl" fontWeight="bold">
@@ -185,7 +172,7 @@ export default function ProductDetailsClient({ id }: Props) {
                     <Text fontWeight="medium">{review.reviewerName}</Text>
                     <Text textStyle="xs">{formatDateTime(review.date)}</Text>
                   </HStack>
-                  {fillStars(review.rating)}
+                  {RatingStars(review.rating)}
                   <Text>{review.comment}</Text>
                 </Box>
               ))}

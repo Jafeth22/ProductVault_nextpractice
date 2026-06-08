@@ -36,8 +36,13 @@ const ProductDetailsPage = async ({ params }: ProductDetailsPageProps) => {
   });
 
   return (
-    // Wrapping the client component with HydrationBoundary to pass the prefetched data to the client component, this will allow the client component to access the prefetched data from the cache without needing to refetch it
-    // dehydrate is used to serialize the query client's state, which includes the prefetched data, and pass it to the client component through the HydrationBoundary. This allows the client component to access the prefetched data from the cache without needing to refetch it, improving performance and providing a better user experience.+
+    // Wrapping the client component with HydrationBoundary to pass the prefetched data to the client component, this will allow
+    // the client component to access the prefetched data from the cache without needing to refetch it
+    //
+    // dehydrate is used to serialize the query client's state, which includes the prefetched data,
+    // and pass it to the client component through the HydrationBoundary. This allows the client component to access
+    // the prefetched data from the cache without needing to refetch it, improving performance and providing a better
+    //  user experience.
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ProductDetailsClient id={id} />
     </HydrationBoundary>

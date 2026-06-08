@@ -3,10 +3,20 @@ import { useState } from "react";
 // import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Box, Button, Flex, Image, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Circle,
+  Flex,
+  Float,
+  Image,
+  Tag,
+  Text,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 
 import Products from "@services/products.service";
+import RatingStars from "@components/custom/RatingStars.comp";
 
 const ProductsPage = () => {
   const router = useRouter();
@@ -26,7 +36,7 @@ const ProductsPage = () => {
   const handleProductClick = (productId: number) => {
     setLoadingId(productId);
     router.push(`/product/${productId}`);
-  }
+  };
 
   return (
     <Flex
@@ -65,7 +75,7 @@ const ProductsPage = () => {
               alignItems="center"
               justifyContent="space-between"
               w="200px"
-              h="300px"
+              h="310px"
               overflow="hidden"
               border="1px solid grey"
               borderRadius="md"
@@ -73,14 +83,33 @@ const ProductsPage = () => {
               gap={2}
               p={2}
             >
-              <Image
-                src={product.thumbnail}
-                alt={`Thumbnail of ${product.title}`}
-                maxH="180px"
-                objectFit="cover"
-              />
-              <Box w="100%">
-                <Text>{product.title}</Text>
+              <Box position="relative">
+                <Image
+                  src={product.thumbnail}
+                  alt={`Thumbnail of ${product.title}`}
+                  maxH="135px"
+                  objectFit="contain"
+                />
+                {product.discountPercentage > 0 && (
+                  <Float placement="top-start" offsetX="-0.5" offsetY="2">
+                    <Tag.Root variant="surface" size="sm" colorPalette="green">
+                      <Tag.Label>% Disc</Tag.Label>
+                    </Tag.Root>
+                  </Float>
+                )}
+              </Box>
+
+              <Box w="100%" h="150px">
+                <Tag.Root variant="outline" size="sm" colorPalette="cyan">
+                  <Tag.Label>{product.category.toUpperCase()}</Tag.Label>
+                </Tag.Root>
+                <Text fontSize="sm" h="40px">
+                  {product.title}
+                </Text>
+                {RatingStars(product.rating)}
+                <Text fontSize="sm" fontWeight="bold">
+                  ${product.price.toFixed(2)}
+                </Text>
                 <Button
                   h="30px"
                   w="100%"
