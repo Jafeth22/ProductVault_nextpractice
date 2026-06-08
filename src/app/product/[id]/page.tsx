@@ -1,5 +1,10 @@
-import { Button } from "@chakra-ui/react";
-import Link from "next/link";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import ProductDetailsClient from "../ProductDetailsClient";
+import Products from "@services/products.service";
 
 export async function generateStaticParams() {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}`, {
@@ -20,23 +25,22 @@ interface ProductDetailsPageProps {
 
 const ProductDetailsPage = async ({ params }: ProductDetailsPageProps) => {
   const { id } = await params;
-  const productResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/${id}`,
-    {
-      cache: "force-cache",
-    },
-  );
-  const currentProduct = await productResponse.json();
+  const queryClient = new QueryClient();
+
+  // Prefetch the product data to have it ready for the client component
+  // Prefetching the product data to have it ready for the client component, this will
+  // populate the cache with the product data before the client component tries to access it.
+  await queryClient.prefetchQuery({
+    queryKey: ["product", id],
+    queryFn: await Products().getProductById(Number(id)),
+  });
+
   return (
-    <div>
-      <Button asChild>
-        <Link href="/">Back to Products</Link>
-      </Button>
-      <br />
-      Product Details Page, ID: {`${id}`}
-      <br />
-      <pre>{JSON.stringify(currentProduct, null, 2)}</pre>
-    </div>
+    // Wrapping the client component with HydrationBoundary to pass the prefetched data to the client component, this will allow the client component to access the prefetched data from the cache without needing to refetch it
+    // dehydrate is used to serialize the query client's state, which includes the prefetched data, and pass it to the client component through the HydrationBoundary. This allows the client component to access the prefetched data from the cache without needing to refetch it, improving performance and providing a better user experience.+
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ProductDetailsClient id={id} />
+    </HydrationBoundary>
   );
 };
 
