@@ -20,7 +20,6 @@ import { CgUnavailable } from "react-icons/cg";
 
 import Products from "@services/products.service";
 import RatingStars from "@components/custom/RatingStars.comp";
-import { HiStar } from "react-icons/hi";
 
 interface Props {
   id: string;

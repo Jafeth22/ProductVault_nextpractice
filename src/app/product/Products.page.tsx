@@ -1,22 +1,13 @@
 "use client";
 import { useState } from "react";
-// import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-import {
-  Box,
-  Button,
-  Circle,
-  Flex,
-  Float,
-  Image,
-  Tag,
-  Text,
-} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+
+import { Box, Button, Flex, Float, Image, Tag, Text } from "@chakra-ui/react";
 
 import Products from "@services/products.service";
 import RatingStars from "@components/custom/RatingStars.comp";
+import { OpenProductDialog } from "@/components/custom/CreateProductDialog.comp";
 
 const ProductsPage = () => {
   const router = useRouter();
@@ -50,6 +41,7 @@ const ProductsPage = () => {
     >
       <Flex w="100%" alignItems="center" justifyContent="center">
         Products List
+        <OpenProductDialog />
       </Flex>
 
       {isLoading && <Text>Loading products...</Text>}
