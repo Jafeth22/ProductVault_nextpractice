@@ -36,7 +36,7 @@ const Products = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newProduct),
     });
-    console.log(["new product create", newProductResp]);
+    console.log(["new product resp", newProductResp]);
     return newProductResp;
   };
 

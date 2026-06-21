@@ -1,76 +1,93 @@
 "use client";
 
+import { useState } from "react";
 import {
   Button,
+  CloseButton,
   Dialog,
+  Field,
   Input,
+  InputGroup,
   Portal,
   Stack,
   createOverlay,
 } from "@chakra-ui/react";
-import Products from "@services/products.service";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+
+import Products from "@services/products.service";
+import { IProducts } from "@/types/products";
 
 interface ContactFormProps {
   title?: string;
 }
 
+type ProductFormState = {
+  title: string;
+  price: string;
+  description: string;
+  discountPercentage: string;
+  stock: string;
+  tags: string;
+  brand: string;
+  availabilityStatus: string;
+};
+
+const initialFormState: ProductFormState = {
+  title: "",
+  price: "",
+  description: "",
+  discountPercentage: "",
+  stock: "",
+  tags: "",
+  brand: "",
+  availabilityStatus: "",
+};
+
 const NewProductDialog = createOverlay<ContactFormProps>((props) => {
   const { title, ...rest } = props;
-  const [titleProd, setTitleProd] = useState<string>("");
-  const [price, setPrice] = useState<number>(0);
-  const [description, setDescription] = useState<string>("");
-  const [discountPercentage, setDiscountPercentage] = useState<number>(0);
-  const [stock, setStock] = useState<number>(0);
-  const [tags, setTags] = useState<string>("");
-  const [brand, setBrand] = useState<string>("");
-  const [availabilityStatus, setAvailabilityStatus] = useState<string>("");
+  const [form, setForm] = useState<ProductFormState>(initialFormState);
 
-  const clearForm = () => {
-    setTitleProd("");
-    setPrice(0);
-    setDescription("");
-    setDiscountPercentage(0);
-    setStock(0);
-    setTags("");
-    setBrand("");
-    setAvailabilityStatus("");
-  };
-
-  /**
-   * it also return mutate, but it is not async
-   */
-  const { mutateAsync } = useMutation({
-    mutationFn: () =>
-      Products().addNewProduct({
-        title: titleProd,
-        price,
-        description,
-        discountPercentage,
-        stock,
-        tags: tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter((tag) => tag.length > 0),
-        brand,
-        availabilityStatus,
-      }),
-    onSuccess: (data) => {
-      console.log(["New Product created, client data", data]);
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (product: IProducts) => Products().addNewProduct(product),
+    onSuccess: () => {
       props.onOpenChange?.({ open: false });
-      clearForm();
+      setForm(initialFormState);
     },
   });
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const data = await mutateAsync();
-    console.log("Created product:", data);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const parseNumber = (value: string) =>
+    value.trim() === "" ? 0 : Number(value);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const newProduct: IProducts = {
+      title: form.title.trim(),
+      price: parseNumber(form.price),
+      description: form.description.trim(),
+      discountPercentage: parseNumber(form.discountPercentage),
+      stock: parseNumber(form.stock),
+      tags: form.tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+      brand: form.brand.trim(),
+      availabilityStatus: form.availabilityStatus.trim(),
+    };
+
+    await mutateAsync(newProduct);
   };
 
   return (
-    <Dialog.Root {...rest}>
+    <Dialog.Root {...rest} placement="center" scrollBehavior="inside">
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
@@ -78,54 +95,134 @@ const NewProductDialog = createOverlay<ContactFormProps>((props) => {
             {title && (
               <Dialog.Header>
                 <Dialog.Title>{title}</Dialog.Title>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton size="sm" />
+                </Dialog.CloseTrigger>
               </Dialog.Header>
             )}
             <Dialog.Body>
               <form onSubmit={handleSubmit}>
                 <Stack gap="4">
-                  <Input
-                    value={titleProd}
-                    onChange={(e) => setTitleProd(e.target.value)}
-                    placeholder="Product Title"
-                  />
-                  <Input
-                    value={price}
-                    onChange={(e) => setPrice(Number(e.target.value))}
-                    placeholder="Product Price $"
-                  />
-                  <Input
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Product Description"
-                  />
-                  <Input
-                    value={discountPercentage}
-                    onChange={(e) =>
-                      setDiscountPercentage(Number(e.target.value))
-                    }
-                    placeholder="Product Discount %"
-                  />
-                  <Input
-                    value={stock}
-                    onChange={(e) => setStock(Number(e.target.value))}
-                    placeholder="Number in stock"
-                  />
-                  <Input
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    placeholder="Product Tags (comma separated)"
-                  />
-                  <Input
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    placeholder="Product Brand"
-                  />
-                  <Input
-                    value={availabilityStatus}
-                    onChange={(e) => setAvailabilityStatus(e.target.value)}
-                    placeholder="Product Availability Status"
-                  />
-                  <Button type="submit">Submit</Button>
+                  <Field.Root required>
+                    <Field.Label>
+                      Product Title <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      name="title"
+                      value={form.title}
+                      onChange={handleInputChange}
+                      placeholder="Product Title"
+                      variant="flushed"
+                    />
+                  </Field.Root>
+
+                  <Field.Root required>
+                    <Field.Label>
+                      Product Price <Field.RequiredIndicator />
+                    </Field.Label>
+                    <InputGroup startElement="$" endElement="USD">
+                      <Input
+                        name="price"
+                        type="number"
+                        value={form.price}
+                        onChange={handleInputChange}
+                        placeholder="1000"
+                        min="0"
+                        step="0.01"
+                        variant="flushed"
+                      />
+                    </InputGroup>
+                  </Field.Root>
+
+                  <Field.Root required>
+                    <Field.Label>
+                      Product Description <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      name="description"
+                      value={form.description}
+                      onChange={handleInputChange}
+                      placeholder="Product Description"
+                      variant="flushed"
+                    />
+                  </Field.Root>
+
+                  <Field.Root required>
+                    <Field.Label>
+                      Product Discount <Field.RequiredIndicator />
+                    </Field.Label>
+                    <InputGroup startElement="%">
+                      <Input
+                        name="discountPercentage"
+                        type="number"
+                        value={form.discountPercentage}
+                        onChange={handleInputChange}
+                        placeholder="10"
+                        min="0"
+                        step="0.01"
+                        variant="flushed"
+                      />
+                    </InputGroup>
+                  </Field.Root>
+
+                  <Field.Root required>
+                    <Field.Label>
+                      Product in stock <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      name="stock"
+                      type="number"
+                      value={form.stock}
+                      onChange={handleInputChange}
+                      placeholder="1000"
+                      min="0"
+                      variant="flushed"
+                    />
+                  </Field.Root>
+
+                  <Field.Root required>
+                    <Field.Label>
+                      Product Tags <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      name="tags"
+                      value={form.tags}
+                      onChange={handleInputChange}
+                      placeholder="Tag1, Tag2, Tag3"
+                      variant="flushed"
+                    />
+                    <Field.HelperText>Separated by commas</Field.HelperText>
+                  </Field.Root>
+
+                  <Field.Root required>
+                    <Field.Label>
+                      Product Brand <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      name="brand"
+                      value={form.brand}
+                      onChange={handleInputChange}
+                      placeholder="Product Brand"
+                      variant="flushed"
+                    />
+                  </Field.Root>
+
+                  <Field.Root required>
+                    <Field.Label>
+                      Product Availability Status <Field.RequiredIndicator />
+                    </Field.Label>
+                    <Input
+                      name="availabilityStatus"
+                      value={form.availabilityStatus}
+                      onChange={handleInputChange}
+                      placeholder="In Stock"
+                      variant="flushed"
+                    />
+                  </Field.Root>
+
+                  <Button type="submit" loading={isPending}>
+                    Add New Product
+                  </Button>
                 </Stack>
               </form>
             </Dialog.Body>
