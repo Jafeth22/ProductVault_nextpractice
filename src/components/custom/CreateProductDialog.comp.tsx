@@ -6,6 +6,7 @@ import {
   CloseButton,
   Dialog,
   Field,
+  IconButton,
   Input,
   InputGroup,
   Portal,
@@ -16,6 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import Products from "@services/products.service";
 import { IProducts } from "@/types/products";
+import { HiPlusSm } from "react-icons/hi";
 
 interface ContactFormProps {
   title?: string;
@@ -234,15 +236,19 @@ const NewProductDialog = createOverlay<ContactFormProps>((props) => {
 });
 
 const OpenProductDialog = () => (
-  <Button
+  <IconButton
+    aria-label="Create New Product"
+    size="md"
+    px="2"
+    gap={1}
     onClick={() =>
       NewProductDialog.open("NewProductDialog", {
         title: "Creating New Product",
       })
     }
   >
-    Create New Product
-  </Button>
+    <HiPlusSm /> Create New Product
+  </IconButton>
 );
 
 export default NewProductDialog;

@@ -3,7 +3,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
-import { Box, Button, Flex, Float, Image, Tag, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Float,
+  Heading,
+  Image,
+  Separator,
+  Tag,
+  Text,
+} from "@chakra-ui/react";
 
 import Products from "@services/products.service";
 import RatingStars from "@components/custom/RatingStars.comp";
@@ -38,11 +48,20 @@ const ProductsPage = () => {
       flexWrap="wrap"
       gap={4}
       my={4}
+      top={14}
     >
-      <Flex w="100%" alignItems="center" justifyContent="center">
-        Products List
+      <Flex justifyContent="space-between" w="100%" alignItems="center">
+        <Flex direction="column">
+          <Heading size="2xl">All Products</Heading>
+          <Text fontSize="sm" color="fg.muted">
+            Manage and organize your product catalog
+          </Text>
+        </Flex>
+
         <OpenProductDialog />
       </Flex>
+
+      <Separator size="lg" />
 
       {isLoading && <Text>Loading products...</Text>}
 
@@ -56,7 +75,7 @@ const ProductsPage = () => {
         <Flex
           w="100%"
           alignItems="center"
-          justifyContent="center"
+          justifyContent="space-between"
           flexWrap="wrap"
           gap={3}
         >
