@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import NextLink from "next/link";
 import {
+  Box,
   Center,
   Grid,
   GridItem,
@@ -13,6 +14,8 @@ import {
 } from "@chakra-ui/react";
 import { FaShoppingCart } from "react-icons/fa";
 
+const GOLD = "#C9A84C";
+
 const Navbar = () => {
   const pathname = usePathname();
 
@@ -21,30 +24,41 @@ const Navbar = () => {
     if (path === "/") return pathname === "/" || pathname === "";
     return pathname.startsWith(path);
   };
+
   return (
     <Grid
       w="100%"
       templateColumns="repeat(4, 1fr)"
       alignItems="center"
-      gap="2"
+      gap={2}
       h={14}
-      px="8"
-      pt="0"
-      background="#0e0e13"
-      boxShadow="inset 0 1px 0 rgba(201,164,62,0.32), 0 1px 0 #1d1d28"
+      px={8}
+      bg="rgba(10,10,14,0.88)"
+      style={{
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+      }}
+      boxShadow="inset 0 1px 0 rgba(201,164,62,0.28), 0 1px 0 rgba(255,255,255,0.04)"
       position="fixed"
       top={0}
       left={0}
       right={0}
-      zIndex="10"
+      zIndex={10}
     >
+      {/* ── Logo ── */}
       <GridItem colSpan={1}>
         <LinkBox>
           <LinkOverlay as={NextLink} href="/">
-            <HStack alignItems="center" color="#f0f0ee">
-              <Icon boxSize="6" color="red.500" mr="2" aria-hidden>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <rect width="24" height="24" rx="7" fill="#c9a43e" />
+            <HStack align="center" gap={2.5}>
+              <Box as="span" flexShrink={0} lineHeight={0}>
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden
+                >
+                  <rect width="24" height="24" rx="7" fill={GOLD} />
                   <path
                     d="M7 8h10M7 12h10M9 16h6"
                     stroke="#0c0c10"
@@ -52,48 +66,74 @@ const Navbar = () => {
                     strokeLinecap="round"
                   />
                 </svg>
-              </Icon>
-              <span
-                style={{
-                  fontSize: 14.5,
-                  letterSpacing: "-0.01em",
-                  color: "inherit",
-                }}
+              </Box>
+              <Box
+                as="span"
+                fontSize="sm"
+                letterSpacing="-0.01em"
+                color="#f0f0ee"
+                userSelect="none"
               >
-                <span style={{ fontWeight: 400 }}>Product</span>
-                <span style={{ fontWeight: 800, color: "#c9a43e" }}>Vault</span>
-              </span>
+                <Box as="span" fontWeight={400}>
+                  Product
+                </Box>
+                <Box as="span" fontWeight={800} color={GOLD}>
+                  Vault
+                </Box>
+              </Box>
             </HStack>
           </LinkOverlay>
         </LinkBox>
       </GridItem>
+
+      {/* ── Nav links ── */}
       <GridItem colSpan={2}>
         <Center>
-          <Link
-            as={NextLink}
-            href="/"
-            fontWeight={isActive("/") ? 700 : 500}
-            color={isActive("/") ? "yellow.300" : "gray.100"}
-            borderBottomWidth={isActive("/") ? "2px" : 0}
-            borderBottomColor="yellow.300"
-          >
-            Home
-          </Link>
+          <HStack gap={6}>
+            <Link
+              as={NextLink}
+              href="/"
+              fontSize="xs"
+              fontWeight={isActive("/") ? 700 : 500}
+              letterSpacing="0.08em"
+              textTransform="uppercase"
+              color={isActive("/") ? GOLD : "gray.500"}
+              borderBottom="2px solid"
+              borderBottomColor={isActive("/") ? GOLD : "transparent"}
+              pb={0.5}
+              transition="all 0.15s ease"
+              _hover={{ color: GOLD, textDecoration: "none" }}
+            >
+              Home
+            </Link>
+          </HStack>
         </Center>
       </GridItem>
+
+      {/* ── Cart ── */}
       <GridItem colSpan={1} justifyItems="end">
         <LinkBox>
           <LinkOverlay as={NextLink} href="/cart">
             <HStack
-              alignItems="center"
-              justifyContent="flex-end"
-              color={isActive("/cart") ? "yellow.300" : "gray.100"}
-              fontWeight={isActive("/cart") ? 700 : 500}
+              align="center"
+              justify="flex-end"
+              gap={2}
+              color={isActive("/cart") ? GOLD : "gray.500"}
+              transition="color 0.15s ease"
+              _hover={{ color: GOLD }}
             >
-              <Icon boxSize="6">
+              <Icon boxSize={4}>
                 <FaShoppingCart />
               </Icon>
-              <span>Cart</span>
+              <Box
+                as="span"
+                fontSize="xs"
+                fontWeight={isActive("/cart") ? 700 : 500}
+                letterSpacing="0.08em"
+                textTransform="uppercase"
+              >
+                Cart
+              </Box>
             </HStack>
           </LinkOverlay>
         </LinkBox>

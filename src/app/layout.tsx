@@ -1,5 +1,6 @@
 import { ChakraProvider } from "@components/ui/ChakraProvider";
 import Navbar from "@components/custom/Navbar.comp";
+import ScrollToTop from "@/hooks/ScrollToTop";
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props;
@@ -8,6 +9,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html suppressHydrationWarning>
       <body cz-shortcut-listen="true">
         <ChakraProvider>
+          <ScrollToTop />
           <Navbar />
           <div style={{ paddingTop: "56px" }}>{children}</div>
         </ChakraProvider>

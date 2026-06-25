@@ -16,6 +16,7 @@ interface IProducts {
   brand: string;
   availabilityStatus: string;
   reviews?: Reviews[];
+  thumbnail?: string;
 }
 
 export type { IProducts };
